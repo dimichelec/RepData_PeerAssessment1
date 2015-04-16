@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -11,7 +6,8 @@ output:
 Read the one .csv file from the .zip source file directly, setting the column
 classes and header names during the import.
 
-```{r echo = TRUE}
+
+```r
 dat <- read.csv(
     unz("activity.zip", "activity.csv"),
     colClasses = c("numeric","Date","numeric"), header = TRUE
@@ -20,8 +16,20 @@ dat <- read.csv(
 
 Show the data summary as a test:
 
-```{r echo = TRUE}
+
+```r
 summary(dat)
+```
+
+```
+##      steps             date               interval     
+##  Min.   :  0.00   Min.   :2012-10-01   Min.   :   0.0  
+##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.: 588.8  
+##  Median :  0.00   Median :2012-10-31   Median :1177.5  
+##  Mean   : 37.38   Mean   :2012-10-31   Mean   :1177.5  
+##  3rd Qu.: 12.00   3rd Qu.:2012-11-15   3rd Qu.:1766.2  
+##  Max.   :806.00   Max.   :2012-11-30   Max.   :2355.0  
+##  NA's   :2304
 ```
 
 
@@ -30,14 +38,16 @@ summary(dat)
 Summarize total steps by date into a new dataframe, making sure to remove
 missing values from the aggregation.
 
-```{r echo = TRUE}
+
+```r
 dailySteps <- aggregate(
     steps ~ date, dat = dat, FUN = "sum", na.action = na.omit
 )
 ```
 
 
-```{r echo = TRUE}
+
+```r
 hist(
     dailySteps$steps,
     main = "Histogram of Total Daily Steps Taken",
@@ -45,28 +55,33 @@ hist(
 )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 Calculate and report the mean and median.
 
-```{r echo = TRUE, results='asis', comment=""}
+
+```r
 mn <- mean(dailySteps$steps)
 md <- median(dailySteps$steps)
 # "format(round(x, 1), nsmall = 1)" used inline in the report below:
 ```
 
-The data shows **`r format(round(mn, 1), nsmall = 1)` mean** and **`r format(round(md, 1), nsmall = 1)` median** total daily steps taken.
+The data shows **10766.2 mean** and **10765.0 median** total daily steps taken.
 
 
 ## What is the average daily activity pattern?
 
 Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
 
-```{r echo = TRUE}
+
+```r
 intervalSteps <- aggregate(
     steps ~ interval, dat = dat, FUN = "mean", na.action = na.omit 
 )
 ```
 
-```{r echo = TRUE}
+
+```r
 plot(
     intervalSteps$interval, intervalSteps$steps,
     main = "Time Series Plot of\nAverage Steps Taken in a Daily 5 Minute Interval",
@@ -76,38 +91,44 @@ plot(
 )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r echo = TRUE}
+
+```r
 mx <- intervalSteps$interval[ intervalSteps$steps == max(intervalSteps$steps) ]
 # mx used inline in the report below:
 ```
 
-The data shows **interval `r mx`** has the maximum daily steps on average.
+The data shows **interval 835** has the maximum daily steps on average.
 
 
 ## Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs).
 
-```{r echo = TRUE}
+
+```r
 missing <- is.na(dat$steps)
 # sum(missing) used inline in the report below:
 ```
 
-The dataset has **`r sum(missing)` missing** step values.
+The dataset has **2304 missing** step values.
 
 Devise a strategy for filling in all of the missing values in the dataset and create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 Make a copy of original.
 
-```{r echo = TRUE}
+
+```r
 dat2 <- dat
 ```
 
 Replace any NA row with the interval average for the NA interval as taken from the table we found above *intervalSteps*.
 
-```{r echo = TRUE}
+
+```r
 dat2$steps[missing] <-
     intervalSteps$steps[
         match(dat2$interval[missing], intervalSteps$interval)
@@ -116,13 +137,15 @@ dat2$steps[missing] <-
 
 Make a histogram of the total number of steps taken each day...
 
-```{r echo = TRUE}
+
+```r
 dailySteps2 <- aggregate(
     steps ~ date, dat = dat2, FUN = "sum", na.action = na.omit
 )
 ```
 
-```{r echo = TRUE}
+
+```r
 hist(
     dailySteps2$steps,
     main = "Histogram of Total Daily Steps Taken\nfor Filled Dataset",
@@ -130,15 +153,18 @@ hist(
 )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
+
 ...and calculate and report the mean and median total number of steps taken per day.
 
-```{r echo = TRUE, results='asis', comment=""}
+
+```r
 mn2 <- mean(dailySteps2$steps)
 md2 <- median(dailySteps2$steps)
 # "format(round(x2, 1), nsmall = 1)" used inline in the report below:
 ```
 
-The data shows **`r format(round(mn2, 1), nsmall = 1)` mean** and **`r format(round(md2, 1), nsmall = 1)` median** total daily steps taken when the dataset is filled with interval averages.
+The data shows **10766.2 mean** and **10766.2 median** total daily steps taken when the dataset is filled with interval averages.
 
 Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -159,7 +185,8 @@ were not integer.**
 
 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r echo=TRUE}
+
+```r
 dat2$dayType <- factor(
     ifelse(
         weekdays(dat$date) == "Sunday" | weekdays(dat$date) == "Saturday",
@@ -170,7 +197,8 @@ dat2$dayType <- factor(
 
 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r echo = TRUE}
+
+```r
 library(lattice)
 xyplot(
     steps ~ interval | dayType, 
@@ -180,7 +208,8 @@ xyplot(
     main="Total Steps Taken per 5 Minute Interval\nfor Filled Dataset", 
     ylab="Interval", xlab="Number of steps"
 )
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png) 
 
 
